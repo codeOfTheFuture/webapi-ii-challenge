@@ -19,6 +19,25 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get all comments from a post
+router.get('/:id/comments', (req, res) => {
+  const { id } = req.params;
+
+  db.findPostComments(id)
+    .then(comments => {
+      if (comments && comments.length) {
+        res.status(200).json(comments);
+      } else {
+        res.status(404).json({
+          message: 'Cannot find comments for this post',
+        });
+      }
+    })
+    .catch(error => {
+      res.status(500).json(error);
+    });
+});
+
 // Get single post by id
 router.get('/:id', async (req, res) => {
   console.log(`hit /:id with ${req.id}`);
@@ -49,6 +68,18 @@ router.post('/', async (req, res) => {
       message: 'There was an error adding the post',
     });
   }
+});
+
+// Add a comment to a post
+router.post('/:id/comments', (req, res) => {
+  console.log('hit /:id/comments');
+  db.insertComment(...req.body)
+    .then(result => {
+      res.status(201).json(result);
+    })
+    .catch(error => {
+      res.status(500).json(error);
+    });
 });
 
 // Update a post
