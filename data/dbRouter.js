@@ -72,14 +72,19 @@ router.post('/', async (req, res) => {
 
 // Add a comment to a post
 router.post('/:id/comments', (req, res) => {
-  console.log('hit /:id/comments');
-  db.insertComment(...req.body)
-    .then(result => {
-      res.status(201).json(result);
-    })
-    .catch(error => {
-      res.status(500).json(error);
+  if (!isValidComment(req.body)) {
+    res.status(400).json({
+      message: 'Please include post_id and text',
     });
+  } else {
+    db.insertComment(req.body)
+      .then(result => {
+        res.status(201).json(result);
+      })
+      .catch(error => {
+        res.status(500).json(error);
+      });
+  }
 });
 
 // Update a post
@@ -119,5 +124,11 @@ router.delete('/:id', async (req, res) => {
     });
   }
 });
+
+const isValidComment = comment => {
+  const { post_id, text } = comment;
+
+  return post_id && text;
+};
 
 module.exports = router;
